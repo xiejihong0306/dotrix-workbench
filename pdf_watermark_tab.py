@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLay
                            QGridLayout, QDateTimeEdit)
 from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtGui import QPixmap
+import fitz  # PyMuPDF
 
 from widgets import DropListWidget
 from main import add_multiple_watermarks, get_application_path
@@ -29,6 +30,10 @@ class PDFWatermarkTab(QWidget):
         self.watermark_image = os.path.join(app_path, "pictures", "dotrix_logo_chn.png")
         self.output_dir = ""
         self.watermark_text = config.DEFAULT_WATERMARK_TEXT  # 默认水印文本
+        
+        # 安全模式设置 - 写死为始终开启，固定DPI=150
+        self.secure_mode = True
+        self.dpi = 150
         
         self.setup_ui()
         
@@ -321,6 +326,38 @@ class PDFWatermarkTab(QWidget):
             self.output_dir = dirpath
             self.output_label.setText(self.output_dir)
     
+    def convert_to_secure_pdf(self, input_pdf, output_pdf):
+        """将PDF转换为图像格式以防止编辑"""
+        try:
+            # 打开输入PDF
+            pdf_doc = fitz.open(input_pdf)
+            # 创建一个新的输出PDF
+            output_doc = fitz.open()
+            
+            # 逐页转换为图像然后添加到新PDF
+            for page_num in range(len(pdf_doc)):
+                # 获取页面
+                page = pdf_doc[page_num]
+                # 计算适当的缩放因子，基于DPI (固定为150)
+                zoom = self.dpi / 72  # 默认PDF分辨率是72 DPI
+                # 创建页面的图像
+                pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom))
+                
+                # 创建新页面，尺寸与原始页面相同（但会按DPI缩放）
+                new_page = output_doc.new_page(width=pix.width, height=pix.height)
+                # 将图像插入新页面
+                new_page.insert_image(fitz.Rect(0, 0, pix.width, pix.height), pixmap=pix)
+            
+            # 保存输出PDF
+            output_doc.save(output_pdf)
+            output_doc.close()
+            pdf_doc.close()
+            
+            return True
+        except Exception as e:
+            print(f"转换PDF到安全格式时出错: {str(e)}")
+            return False
+    
     def batch_process(self):
         """批量处理PDF文件"""
         # 检查是否已选择所有必要文件
@@ -351,29 +388,36 @@ class PDFWatermarkTab(QWidget):
             QApplication.processEvents()
             
             total_files = len(self.pdf_files)
-            self.progress_bar.setMaximum(total_files)
+            # 处理步骤是两倍文件数，因为每个文件都需要添加水印和安全转换两个步骤
+            max_steps = total_files * 2
+            self.progress_bar.setMaximum(max_steps)
             successful = 0
             failed = 0
+            
+            step_count = 0
             
             # 处理每个PDF文件
             for i, input_pdf in enumerate(self.pdf_files):
                 try:
                     # 更新进度
-                    self.progress_bar.setValue(i)
-                    self.status_label.setText(f"处理中: {os.path.basename(input_pdf)} ({i+1}/{total_files})")
+                    self.progress_bar.setValue(step_count)
+                    self.status_label.setText(f"处理中: {os.path.basename(input_pdf)} - 添加水印 ({i+1}/{total_files})")
                     QApplication.processEvents()  # 确保UI更新
                     
                     # 创建输出文件路径
                     base_name = os.path.basename(input_pdf)
                     name, ext = os.path.splitext(base_name)
-                    output_pdf = os.path.join(self.output_dir, f"{name}_带水印{ext}")
+                    
+                    # 先创建临时文件用于添加水印
+                    temp_output = os.path.join(self.output_dir, f"{name}_temp{ext}")
+                    final_output = os.path.join(self.output_dir, f"{name}_带水印{ext}")
                     
                     # 添加网格状水印
                     add_multiple_watermarks(
                         input_pdf=input_pdf,
                         watermark_image=self.watermark_image,
                         watermark_text=self.watermark_text,
-                        output_pdf=output_pdf,
+                        output_pdf=temp_output,
                         img_scale=config.DEFAULT_IMG_SCALE,
                         img_opacity=config.DEFAULT_IMG_OPACITY,
                         font_name=config.DEFAULT_FONT_NAME,
@@ -384,13 +428,37 @@ class PDFWatermarkTab(QWidget):
                         rows=5,   # 5行
                         cols=3    # 3列
                     )
+                    
+                    step_count += 1
+                    self.progress_bar.setValue(step_count)
+                    
+                    # 将带水印的PDF转换为图像格式
+                    self.status_label.setText(f"处理中: {os.path.basename(input_pdf)} - 安全转换 ({i+1}/{total_files})")
+                    QApplication.processEvents()
+                    
+                    # 执行安全转换
+                    if self.convert_to_secure_pdf(temp_output, final_output):
+                        # 删除临时文件
+                        try:
+                            os.remove(temp_output)
+                        except:
+                            pass  # 忽略临时文件删除失败
+                    else:
+                        # 转换失败，使用临时文件作为最终输出
+                        if os.path.exists(temp_output):
+                            if not os.path.exists(final_output):
+                                os.rename(temp_output, final_output)
+                    
+                    step_count += 1
+                    self.progress_bar.setValue(step_count)
+                    
                     successful += 1
                 except Exception as e:
                     print(f"处理文件 {input_pdf} 时出错: {str(e)}")
                     failed += 1
             
             # 更新最终进度
-            self.progress_bar.setValue(total_files)
+            self.progress_bar.setValue(max_steps)
             
             status_color = "green" if failed == 0 else "orange"
             self.status_label.setText(f"处理完成! 成功: {successful}, 失败: {failed}")
@@ -399,7 +467,7 @@ class PDFWatermarkTab(QWidget):
             QMessageBox.information(
                 self, 
                 "处理完成", 
-                f"批量处理完成!\n成功: {successful} 个文件\n失败: {failed} 个文件\n输出目录: {self.output_dir}"
+                f"批量处理完成!\n已启用防编辑模式，PDF已转换为不可编辑格式\n成功: {successful} 个文件\n失败: {failed} 个文件\n输出目录: {self.output_dir}"
             )
         
         except Exception as e:

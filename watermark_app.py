@@ -74,7 +74,7 @@ class WatermarkApp(QMainWindow):
     def setup_window_icon(self):
         """设置窗口图标"""
         # 使用pictures目录下的图标
-        icon_path = os.path.join(config.PICTURES_DIR, "sakura.png")
+        icon_path = os.path.join(config.PICTURES_DIR, "icon_toolkit.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         else:

@@ -245,6 +245,28 @@ def add_combined_watermark(input_pdf, watermark_image, watermark_text, output_pd
     new_height = int(img_height * img_scale)
     img = img.resize((new_width, new_height), Image.LANCZOS)
     
+    # 准备英文水印图片
+    eng_watermark_path = None
+    eng_img = None
+    eng_new_width = 0
+    eng_new_height = 0
+    
+    # 检查英文水印图片是否存在
+    app_path = get_application_path()
+    eng_watermark_path = os.path.join(app_path, "pictures", "dotrix_logo_eng.png")
+    if os.path.exists(eng_watermark_path):
+        # 打开英文水印图片
+        eng_img = Image.open(eng_watermark_path)
+        if eng_img.mode != 'RGBA':
+            eng_img = eng_img.convert('RGBA')
+        
+        # 调整英文水印图片尺寸 - 使用更小的缩放比例 (70%的主水印大小)
+        eng_img_width, eng_img_height = eng_img.size
+        eng_scale = img_scale * 0.5  # 比主水印小50%
+        eng_new_width = int(eng_img_width * eng_scale)
+        eng_new_height = int(eng_img_height * eng_scale)
+        eng_img = eng_img.resize((eng_new_width, eng_new_height), Image.LANCZOS)
+    
     # 读取原始PDF
     pdf_reader = PdfReader(input_pdf)
     pdf_writer = PdfWriter()
@@ -272,6 +294,18 @@ def add_combined_watermark(input_pdf, watermark_image, watermark_text, output_pd
         c.setFillAlpha(img_opacity)  # 设置透明度
         c.drawImage(watermark_image, x_centered, y_centered, width=new_width, height=new_height)
         c.restoreState()
+        
+        # 1.5 添加英文水印图片在随机位置（如果存在）
+        if eng_watermark_path and os.path.exists(eng_watermark_path):
+            # 生成随机位置，确保图片完全在页面内
+            rand_x = random.uniform(eng_new_width/2, page_width - eng_new_width)
+            rand_y = random.uniform(eng_new_height/2, page_height - eng_new_height)
+            
+            # 在透明画布上绘制英文图片水印
+            c.saveState()
+            c.setFillAlpha(img_opacity)  # 使用相同的透明度
+            c.drawImage(eng_watermark_path, rand_x, rand_y, width=eng_new_width, height=eng_new_height)
+            c.restoreState()
         
         # 2. 绘制文字水印
         # 设置字体和颜色
@@ -349,6 +383,12 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
         rows: 每页上水印文字的行数
         cols: 每页上水印文字的列数
         add_horizontal: 是否添加随机位置的水平水印
+        
+    每页PDF包含:
+    1. 中心位置的中文图片水印
+    2. 随机位置的英文图片水印 (比中文水印尺寸小50%)
+    3. 网格排布的倾斜文字水印
+    4. 随机位置的水平黑色与白色文字水印
     """
     # 导入随机模块
     import random
@@ -363,6 +403,28 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
     new_width = int(img_width * img_scale)
     new_height = int(img_height * img_scale)
     img = img.resize((new_width, new_height), Image.LANCZOS)
+    
+    # 准备英文水印图片
+    eng_watermark_path = None
+    eng_img = None
+    eng_new_width = 0
+    eng_new_height = 0
+    
+    # 检查英文水印图片是否存在
+    app_path = get_application_path()
+    eng_watermark_path = os.path.join(app_path, "pictures", "dotrix_logo_eng.png")
+    if os.path.exists(eng_watermark_path):
+        # 打开英文水印图片
+        eng_img = Image.open(eng_watermark_path)
+        if eng_img.mode != 'RGBA':
+            eng_img = eng_img.convert('RGBA')
+        
+        # 调整英文水印图片尺寸 - 使用更小的缩放比例
+        eng_img_width, eng_img_height = eng_img.size
+        eng_scale = img_scale * 0.2  # 比主水印小80%
+        eng_new_width = int(eng_img_width * eng_scale)
+        eng_new_height = int(eng_img_height * eng_scale)
+        eng_img = eng_img.resize((eng_new_width, eng_new_height), Image.LANCZOS)
     
     # 读取原始PDF
     pdf_reader = PdfReader(input_pdf)
@@ -391,6 +453,18 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
         c.setFillAlpha(img_opacity)  # 设置透明度
         c.drawImage(watermark_image, x_centered, y_centered, width=new_width, height=new_height)
         c.restoreState()
+        
+        # 1.5 添加英文水印图片在随机位置（如果存在）
+        if eng_watermark_path and os.path.exists(eng_watermark_path):
+            # 生成随机位置，确保图片完全在页面内
+            rand_x = random.uniform(eng_new_width/2, page_width - eng_new_width)
+            rand_y = random.uniform(eng_new_height/2, page_height - eng_new_height)
+            
+            # 在透明画布上绘制英文图片水印
+            c.saveState()
+            c.setFillAlpha(img_opacity)  # 使用相同的透明度
+            c.drawImage(eng_watermark_path, rand_x, rand_y, width=eng_new_width, height=eng_new_height)
+            c.restoreState()
         
         # 2. 绘制多条文字水印以网格形式分布
         # 设置字体和颜色
@@ -447,7 +521,7 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
         # 3. 添加随机位置的水平水印（跑马灯效果）
         if add_horizontal:
             # 设置小字号，不透明黑色
-            horizontal_size = 14  # 小字号
+            horizontal_size = 7  # 小字号
             c.setFont(font_name, horizontal_size)
             c.setFillColor(Color(0, 0, 0, alpha=1.0))  # 不透明黑色
             
@@ -456,6 +530,19 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
             
             for _ in range(3):
                 # 生成随机位置
+                rand_x = random.uniform(horizontal_text_width/2, page_width - horizontal_text_width/2)
+                rand_y = random.uniform(horizontal_size*2, page_height - horizontal_size*2)
+                
+                # 绘制水平文字
+                c.saveState()
+                c.drawString(rand_x - horizontal_text_width/2, rand_y, watermark_text)
+                c.restoreState()
+            
+            # 添加3个白色水平水印
+            c.setFillColor(Color(1, 1, 1, alpha=1.0))  # 不透明白色
+            
+            for _ in range(3):
+                # 生成随机位置（与黑色水印位置不同）
                 rand_x = random.uniform(horizontal_text_width/2, page_width - horizontal_text_width/2)
                 rand_y = random.uniform(horizontal_size*2, page_height - horizontal_size*2)
                 
@@ -493,7 +580,9 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
     print(f"网格状文字水印已添加到{position}，输出文件: {output_pdf}")
     print(f"使用了 {rows} 行，每行约 {actual_cols} 个水印")
     if add_horizontal:
-        print(f"每页添加了3个随机位置的水平水印")
+        print(f"每页添加了3个黑色和3个白色随机位置的水平水印")
+    if eng_watermark_path and os.path.exists(eng_watermark_path):
+        print(f"每页添加了随机位置的英文LOGO水印")
 
 
 # 示例使用 - 只在直接运行脚本时执行，作为导入模块时不执行

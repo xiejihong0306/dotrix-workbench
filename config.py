@@ -8,7 +8,7 @@
 import os
 
 # 应用程序名称和版本
-APP_NAME = "点线成面DOTRIX Tool Kit V1.0.0"
+APP_NAME = "DOTRIX ToolKit V1.0.0 点线成面软件工程部 "
 APP_VERSION = "1.0.0"
 
 # 默认文件夹
