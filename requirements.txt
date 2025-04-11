@@ -1,0 +1,5 @@
+PyPDF2>=2.0.0
+Pillow>=8.0.0
+reportlab>=3.6.0
+PyQt5>=5.15.0
+pymupdf>=1.19.0  # 用于安全水印功能
