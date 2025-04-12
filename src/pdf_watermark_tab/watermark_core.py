@@ -1,9 +1,7 @@
-import PyPDF2
+
 from PIL import Image
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 import os
-import io
 import tempfile
 import math
 import sys

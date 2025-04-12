@@ -2,26 +2,27 @@
 # -*- coding: utf-8 -*-
 
 """
-水印生成器主应用程序
+工作台应用程序 - 仅包含UI相关代码
 """
 
 import os
 import sys
 from PyQt5.QtWidgets import (QMainWindow, QTabWidget, QLabel, 
-                           QVBoxLayout, QWidget, QHBoxLayout, QSizePolicy,
+                           QVBoxLayout, QWidget, QHBoxLayout,
                            QPushButton, QFileDialog, QProgressBar, QMessageBox, 
-                           QScrollArea, QApplication, QListWidgetItem)
+                         QApplication, QListWidgetItem, QFrame)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
 
 from src.pdf_watermark_tab import PDFWatermarkTab
-from src.video_watermark_tab import VideoWatermarkTab
-from src.about_tab import AboutTab
+from video_watermark_tab.video_watermark_tab import VideoWatermarkTab
+from about_tab.about_tab import AboutTab
+# 所有PDF相关功能都从watermark_core.py导入
 from src.pdf_watermark_tab.watermark_core import get_application_path, add_combined_watermark
 import config
-from src.widgets import DropArea, DropListWidget
+from .widgets import DropArea, DropListWidget
 
-class WatermarkApp(QMainWindow):
+class WorkbenchApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.pdf_files = []
@@ -113,6 +114,7 @@ class WatermarkApp(QMainWindow):
             print(f"加载中文Logo: {chn_logo_path}")
         
         # 左侧第二个Logo - 英文
+        # UI需要显示该logo
         eng_logo_path = os.path.join(app_path, config.PICTURES_DIR, "dotrix_logo_eng.png")
         if os.path.exists(eng_logo_path):
             img_label2 = QLabel()
@@ -420,7 +422,7 @@ class WatermarkApp(QMainWindow):
                     name, ext = os.path.splitext(base_name)
                     output_pdf = os.path.join(self.output_dir, f"{name}_带水印{ext}")
                     
-                    # 添加水印
+                    # 使用从watermark_core.py导入的函数处理PDF
                     add_combined_watermark(
                         input_pdf=input_pdf,
                         watermark_image=self.watermark_image,

@@ -5,8 +5,6 @@
 配置文件，存储应用程序的各种设置
 """
 
-import os
-
 # 应用程序名称和版本
 APP_VERSION = "1.0.0"
 APP_NAME = f"DOTRIX Workbench V{APP_VERSION} 点线成面软件工程部 "

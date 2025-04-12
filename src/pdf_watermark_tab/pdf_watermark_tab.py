@@ -9,19 +9,17 @@ import os
 import sys
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout,
                            QFrame, QFileDialog, QProgressBar, QMessageBox, 
-                           QApplication, QListWidgetItem, QInputDialog, QLineEdit,
+                           QApplication, QListWidgetItem, QLineEdit,
                            QGridLayout, QDateTimeEdit)
 from PyQt5.QtCore import Qt, QDateTime
-from PyQt5.QtGui import QPixmap
 import fitz  # PyMuPDF
 from pathlib import Path
 
 # 修改相对导入为绝对导入
-from src.widgets import DropListWidget
+from src.workbench_app.widgets import DropListWidget
 from src.pdf_watermark_tab.watermark_core import add_multiple_watermarks, get_application_path
 import config
-from src.pdf_watermark_tab.watermark_core import add_text_watermark, add_watermark, add_combined_watermark
-from src.pdf_watermark_tab.utils import is_valid_pdf
+
 
 class PDFWatermarkTab(QWidget):
     def __init__(self, parent=None):

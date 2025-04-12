@@ -9,7 +9,7 @@ import sys
 import os
 import traceback
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from src.workbench_app import WatermarkApp
+from src.workbench_app import WorkbenchApp
 
 def exception_hook(exctype, value, tb):
     """全局异常处理器"""
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     
     try:
         app = QApplication(sys.argv)
-        window = WatermarkApp()
+        window = WorkbenchApp()
         window.show()
         sys.exit(app.exec_())
     except Exception as e:
