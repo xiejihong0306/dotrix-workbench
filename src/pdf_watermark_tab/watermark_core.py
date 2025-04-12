@@ -28,8 +28,12 @@ def get_application_path():
     else:
         # 如果是脚本运行
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        # 检查当前目录是否为src目录
-        if os.path.basename(current_dir) == 'src':
+        # 检查当前目录是否为pdf_watermark_tab目录
+        parent_dir = os.path.dirname(current_dir)
+        if os.path.basename(current_dir) == 'pdf_watermark_tab' and os.path.basename(parent_dir) == 'src':
+            # 返回src的父目录（因为pictures和fonts在src的上一级）
+            return os.path.dirname(parent_dir)
+        elif os.path.basename(current_dir) == 'src':
             # 返回父目录（因为pictures和fonts在src的上一级）
             return os.path.dirname(current_dir)
         else:

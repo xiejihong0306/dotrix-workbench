@@ -14,12 +14,12 @@ from PyQt5.QtWidgets import (QMainWindow, QTabWidget, QLabel,
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
 
-from pdf_watermark_tab import PDFWatermarkTab
-from video_watermark_tab import VideoWatermarkTab
-from about_tab import AboutTab
-from watermark_core import get_application_path, add_combined_watermark
+from src.pdf_watermark_tab import PDFWatermarkTab
+from src.video_watermark_tab import VideoWatermarkTab
+from src.about_tab import AboutTab
+from src.pdf_watermark_tab.watermark_core import get_application_path, add_combined_watermark
 import config
-from widgets import DropArea, DropListWidget
+from src.widgets import DropArea, DropListWidget
 
 class WatermarkApp(QMainWindow):
     def __init__(self):

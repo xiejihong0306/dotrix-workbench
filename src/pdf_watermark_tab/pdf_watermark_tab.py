@@ -16,11 +16,12 @@ from PyQt5.QtGui import QPixmap
 import fitz  # PyMuPDF
 from pathlib import Path
 
-from widgets import DropListWidget
-from watermark_core import add_multiple_watermarks, get_application_path
+# 修改相对导入为绝对导入
+from src.widgets import DropListWidget
+from src.pdf_watermark_tab.watermark_core import add_multiple_watermarks, get_application_path
 import config
-from watermark_core import add_text_watermark, add_watermark, add_combined_watermark
-from utils import is_valid_pdf
+from src.pdf_watermark_tab.watermark_core import add_text_watermark, add_watermark, add_combined_watermark
+from src.pdf_watermark_tab.utils import is_valid_pdf
 
 class PDFWatermarkTab(QWidget):
     def __init__(self, parent=None):
