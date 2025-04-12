@@ -10,7 +10,7 @@ import sys
 import warnings
 
 # 导入主应用类以保持向后兼容
-from watermark_app import WatermarkApp
+from src.workbench_app import WatermarkApp
 
 # 发出弃用警告
 warnings.warn(

@@ -7,20 +7,33 @@ import io
 import tempfile
 import math
 import sys
+import random
 from reportlab.lib.colors import Color
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from PyPDF2 import PdfReader, PdfWriter
+import config
 
 
 # 获取可执行文件目录（处理PyInstaller打包的情况）
 def get_application_path():
     if getattr(sys, 'frozen', False):
         # 如果是打包后的可执行文件
-        return os.path.dirname(sys.executable)
+        try:
+            # PyInstaller在临时目录中创建了一个_MEI文件夹
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.dirname(sys.executable)
+        return base_path
     else:
         # 如果是脚本运行
-        return os.path.dirname(os.path.abspath(__file__))
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # 检查当前目录是否为src目录
+        if os.path.basename(current_dir) == 'src':
+            # 返回父目录（因为pictures和fonts在src的上一级）
+            return os.path.dirname(current_dir)
+        else:
+            return current_dir
 
 
 # 注册宋体
@@ -253,7 +266,7 @@ def add_combined_watermark(input_pdf, watermark_image, watermark_text, output_pd
     
     # 检查英文水印图片是否存在
     app_path = get_application_path()
-    eng_watermark_path = os.path.join(app_path, "pictures", "dotrix_logo_eng.png")
+    eng_watermark_path = os.path.join(app_path, config.PICTURES_DIR, "dotrix_logo_eng.png")
     if os.path.exists(eng_watermark_path):
         # 打开英文水印图片
         eng_img = Image.open(eng_watermark_path)
@@ -390,9 +403,6 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
     3. 网格排布的倾斜文字水印
     4. 随机位置的水平黑色与白色文字水印
     """
-    # 导入随机模块
-    import random
-    
     # 打开水印图片
     img = Image.open(watermark_image)
     if img.mode != 'RGBA':
@@ -412,7 +422,7 @@ def add_multiple_watermarks(input_pdf, watermark_image, watermark_text, output_p
     
     # 检查英文水印图片是否存在
     app_path = get_application_path()
-    eng_watermark_path = os.path.join(app_path, "pictures", "dotrix_logo_eng.png")
+    eng_watermark_path = os.path.join(app_path, config.PICTURES_DIR, "dotrix_logo_eng.png")
     if os.path.exists(eng_watermark_path):
         # 打开英文水印图片
         eng_img = Image.open(eng_watermark_path)
@@ -604,4 +614,4 @@ if __name__ == "__main__":
         text_opacity=0.5,
         angle=45,
         on_top=True
-    )
+    ) 

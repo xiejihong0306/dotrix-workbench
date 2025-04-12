@@ -8,8 +8,8 @@
 import os
 
 # 应用程序名称和版本
-APP_NAME = "DOTRIX ToolKit V1.0.0 点线成面软件工程部 "
 APP_VERSION = "1.0.0"
+APP_NAME = f"DOTRIX Workbench V{APP_VERSION} 点线成面软件工程部 "
 
 # 默认文件夹
 PICTURES_DIR = "pictures"
@@ -24,8 +24,8 @@ DEFAULT_ANGLE = 45              # 默认旋转角度
 DEFAULT_WATERMARK_TEXT = "PDF加水印测试"  # 默认水印文字
 
 # UI设置
-UI_WIDTH = 520
-UI_HEIGHT = 600  # 增加高度以适应选项卡
+UI_WIDTH = 540
+UI_HEIGHT = 620  # 增加高度以适应选项卡
 PDF_LIST_HEIGHT = 180
 IMG_DROP_HEIGHT = 40
 PROGRESS_BAR_HEIGHT = 15

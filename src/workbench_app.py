@@ -17,7 +17,7 @@ from PyQt5.QtGui import QPixmap, QIcon
 from pdf_watermark_tab import PDFWatermarkTab
 from video_watermark_tab import VideoWatermarkTab
 from about_tab import AboutTab
-from main import get_application_path, add_combined_watermark
+from watermark_core import get_application_path, add_combined_watermark
 import config
 from widgets import DropArea, DropListWidget
 
@@ -73,21 +73,26 @@ class WatermarkApp(QMainWindow):
     
     def setup_window_icon(self):
         """设置窗口图标"""
+        # 使用get_application_path获取应用根目录
+        app_path = get_application_path()
+        
         # 使用pictures目录下的图标
-        icon_path = os.path.join(config.PICTURES_DIR, "icon_toolkit.png")
+        icon_path = os.path.join(app_path, config.PICTURES_DIR, "icon_toolkit.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
+            print(f"成功加载图标: {icon_path}")
         else:
             # 尝试查找目录中的第一个图片文件作为图标
-            if os.path.exists(config.PICTURES_DIR):
-                for file in os.listdir(config.PICTURES_DIR):
+            pictures_dir = os.path.join(app_path, config.PICTURES_DIR)
+            if os.path.exists(pictures_dir):
+                for file in os.listdir(pictures_dir):
                     if file.lower().endswith(('.png', '.jpg', '.jpeg', '.ico')):
-                        icon_path = os.path.join(config.PICTURES_DIR, file)
+                        icon_path = os.path.join(pictures_dir, file)
                         self.setWindowIcon(QIcon(icon_path))
-                        print(f"使用图标: {icon_path}")
+                        print(f"使用替代图标: {icon_path}")
                         break
             else:
-                print("警告: 无法找到图标目录")
+                print(f"警告: 无法找到图标目录 {pictures_dir}")
     
     def create_title_layout(self):
         """创建标题栏布局"""

@@ -9,7 +9,7 @@ import sys
 import os
 import traceback
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from watermark_app import WatermarkApp
+from src.workbench_app import WatermarkApp
 
 def exception_hook(exctype, value, tb):
     """全局异常处理器"""

@@ -14,10 +14,13 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLay
 from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtGui import QPixmap
 import fitz  # PyMuPDF
+from pathlib import Path
 
 from widgets import DropListWidget
-from main import add_multiple_watermarks, get_application_path
+from watermark_core import add_multiple_watermarks, get_application_path
 import config
+from watermark_core import add_text_watermark, add_watermark, add_combined_watermark
+from utils import is_valid_pdf
 
 class PDFWatermarkTab(QWidget):
     def __init__(self, parent=None):
@@ -27,7 +30,7 @@ class PDFWatermarkTab(QWidget):
         # 获取应用根目录
         app_path = get_application_path()
         # 固定使用dotrix_logo_chn.png作为水印图片
-        self.watermark_image = os.path.join(app_path, "pictures", "dotrix_logo_chn.png")
+        self.watermark_image = os.path.join(app_path, config.PICTURES_DIR, "dotrix_logo_chn.png")
         self.output_dir = ""
         self.watermark_text = config.DEFAULT_WATERMARK_TEXT  # 默认水印文本
         
