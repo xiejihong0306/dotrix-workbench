@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-打包脚本 - 将水印生成器打包为exe文件
+打包脚本 - 将DOTRIX Workbench打包为exe文件
 """
 
 import os
@@ -49,6 +49,11 @@ try:
 except Exception as e:
     print(f"复制字体文件时发生错误: {e}")
 
+# 创建临时日志目录，确保打包时包含
+logs_dir = os.path.join(script_dir, 'src', 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+print(f"创建日志目录: {logs_dir}")
+
 # 确保pictures目录中包含必要的水印图片
 pictures_dir = os.path.join(script_dir, 'pictures')
 required_images = ['dotrix_logo_chn.png', 'dotrix_logo_eng.png', 'icon_toolkit.png']
@@ -68,27 +73,48 @@ print("注意：当前版本的PyInstaller不支持并行构建，将使用单�
 # 设置入口脚本路径
 entry_script = os.path.join('src', 'run.py')
 
-# PyInstaller参数
-pyinstaller_args = [
-    entry_script,                     # 入口脚本(src/run.py)
-    f'--name={app_name}',             # 应用名称
-    '--onefile',                      # 生成单个exe文件
-    '--windowed',                     # 不显示控制台窗口
-    f'--icon={icon_path}',            # 设置应用图标
-    '--add-data=pictures;pictures',   # 添加资源文件夹
-    '--add-data=fonts;fonts',         # 添加字体文件夹
-    '--hidden-import=PyPDF2',         # 显式指定PDF库
-    '--hidden-import=reportlab',      # 显式指定reportlab库
-    '--hidden-import=PIL',            # 显式指定PIL库
-    '--hidden-import=fitz',           # 显式指定PyMuPDF库
-    '--clean',                        # 清理临时文件
-    '--noconfirm',                    # 不要询问确认
-    '--paths=src',                    # 添加源代码目录到Python路径
+# 构建数据文件列表
+data_files = [
+    'pictures;pictures',   # 添加图片资源文件夹
+    'fonts;fonts',         # 添加字体文件夹
+    'src/logs;logs'        # 添加日志文件夹
 ]
 
-# 减少收集的库资源，只保留必要部分
-# 替换掉collect-all，使用更精细的导入控制
-for module in ['PyPDF2', 'reportlab', 'PIL', 'fitz', 'PyQt5', 'html']:
+# 构建隐藏导入模块列表
+hidden_imports = [
+    'PyPDF2', 
+    'reportlab', 
+    'PIL', 
+    'fitz',
+    'PyQt5',
+    'PyQt5.QtCore',
+    'PyQt5.QtGui', 
+    'PyQt5.QtWidgets',
+    'src.pdf_watermark_tab',
+    'src.video_watermark_tab',
+    'src.about_tab',
+    'src.workbench_app',
+    'datetime'
+]
+
+# PyInstaller参数
+pyinstaller_args = [
+    entry_script,                    # 入口脚本(src/run.py)
+    f'--name={app_name}',            # 应用名称
+    '--onefile',                     # 生成单个exe文件
+    '--windowed',                    # 不显示控制台窗口
+    f'--icon={icon_path}',           # 设置应用图标
+    '--clean',                       # 清理临时文件
+    '--noconfirm',                   # 不要询问确认
+    '--paths=src',                   # 添加源代码目录到Python路径
+]
+
+# 添加数据文件
+for data_file in data_files:
+    pyinstaller_args.append(f'--add-data={data_file}')
+
+# 添加隐藏导入
+for module in hidden_imports:
     pyinstaller_args.append(f'--hidden-import={module}')
 
 # 排除一些不必要的模块来减小文件体积
@@ -106,6 +132,7 @@ if upx_available:
     pyinstaller_args.append('--upx')        # 启用UPX压缩
 
 # 执行PyInstaller打包
+print("开始打包应用...")
 PyInstaller.__main__.run(pyinstaller_args)
 
 print("打包完成！可执行文件位于 dist 文件夹中。")
