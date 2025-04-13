@@ -6,7 +6,7 @@
 """
 
 # 应用程序名称和版本
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 APP_NAME = f"DOTRIX Workbench V{APP_VERSION} 点线成面软件工程部 "
 
 # 默认文件夹

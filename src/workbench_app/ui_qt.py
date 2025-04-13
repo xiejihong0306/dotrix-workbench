@@ -3,18 +3,18 @@
 
 """
 此文件用于支持向后兼容
-新代码应直接导入 watermark_app 模块中的 WatermarkApp 类
+新代码应直接导入 workbench_app 模块中的 WorkbenchApp 类
 """
 
 import sys
 import warnings
 
 # 导入主应用类以保持向后兼容
-from src.workbench_app import WatermarkApp
+from src.workbench_app import WorkbenchApp
 
 # 发出弃用警告
 warnings.warn(
-    "直接导入ui_qt模块已弃用，请改为从watermark_app模块导入WatermarkApp",
+    "直接导入ui_qt模块已弃用，请改为从workbench_app模块导入WorkbenchApp",
     DeprecationWarning,
     stacklevel=2
 )
@@ -30,6 +30,6 @@ if __name__ == "__main__":
     )
     
     app = QApplication(sys.argv)
-    window = WatermarkApp()
+    window = WorkbenchApp()
     window.show()
     sys.exit(app.exec_()) 
